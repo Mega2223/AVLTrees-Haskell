@@ -68,32 +68,45 @@ rebalance Void = Void
 rebalance (Node ll rr vv) = do
 	let selfN = Node ll rr vv
 
-	let bal = balance selfN
-
 	let llr = rebalance ll
 	let rrl = rebalance rr
-	
-	selfN
+	let nn = Node llr rrl vv
+
+	let bal = balance selfN
+	if bal < -1 then
+		if balance nn <= 0 then
+			rotateL nn
+		else
+			rotateRL nn	
+	else if bal > 1 then
+		if balance nn >= 0 then
+			rotateR nn
+		else
+			rotateLR nn	
+	else
+		nn
 
 insertKeepBalance :: Node -> Node -> Node
 insertKeepBalance Void node = node
 insertKeepBalance (Node ll rr vv) node = do
 	let node' = insertNoBalance (Node ll rr vv) node
-
-	node'
+	rebalance node'
 
 -- TODO função printflat
 
 main :: IO ()
 main = do
-	let t0 = insertNoBalance Void (Node Void Void 9)
-	let t1 = insertNoBalance t0 (Node Void Void 8)
-	let t2 = insertNoBalance t1 (Node Void Void 7)
-	let t3 = insertNoBalance t2 (Node Void Void 6)
-	let t4 = insertNoBalance t3 (Node Void Void 5)
-	let t5 = insertNoBalance t4 (Node Void Void 4)
+	let t0 = insertKeepBalance Void (Node Void Void 9)
+	let t1 = insertKeepBalance t0 (Node Void Void 8)
+	let t2 = insertKeepBalance t1 (Node Void Void 7)
+	let t3 = insertKeepBalance t2 (Node Void Void 6)
+	let t4 = insertKeepBalance t3 (Node Void Void 5)
+	let t5 = insertKeepBalance t4 (Node Void Void 4)
+	let t6 = insertKeepBalance t5 (Node Void Void 3)
+	let t7 = insertKeepBalance t6 (Node Void Void 2)
+	let t8 = insertKeepBalance t7 (Node Void Void 1)
 	
-	let h = printTree t5 1
+	let h = printTree t8 1
 
 	putStrLn h
 	print "?"

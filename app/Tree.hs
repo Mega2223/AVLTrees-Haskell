@@ -1,11 +1,18 @@
 data Node = Node {left :: Node, right :: Node, val :: Int} | Void
 
+instance Show Node where
+	show n = show (val n)
+
 printTree :: Node -> Int -> String
 printTree (Node l r v) c = do
 	let br = concat ["|-" | _ <- [1..c]]
-	show v ++ "\n" ++ br ++ "L: " ++ printTree l (c+1) ++ "\n" ++ br ++ "R:" ++ printTree r (c+1)
+	show v ++ "\n" ++ br ++ "L: " ++ printTree l (c+1) ++ "\n" ++ br ++ "R: " ++ printTree r (c+1)
 printTree Void _ = do
 	"N"
+
+flatten :: Node -> [Node]
+flatten Void = []
+flatten (Node l r v) = flatten l ++ [Node l r v] ++ flatten r
 
 insertNoBalance :: Node -> Node -> Node
 insertNoBalance Void node = node
@@ -96,17 +103,18 @@ insertKeepBalance (Node ll rr vv) node = do
 
 main :: IO ()
 main = do
-	let t0 = insertKeepBalance Void (Node Void Void 9)
-	let t1 = insertKeepBalance t0 (Node Void Void 8)
-	let t2 = insertKeepBalance t1 (Node Void Void 7)
-	let t3 = insertKeepBalance t2 (Node Void Void 6)
-	let t4 = insertKeepBalance t3 (Node Void Void 5)
-	let t5 = insertKeepBalance t4 (Node Void Void 4)
-	let t6 = insertKeepBalance t5 (Node Void Void 3)
-	let t7 = insertKeepBalance t6 (Node Void Void 2)
-	let t8 = insertKeepBalance t7 (Node Void Void 1)
+	let insLeft node count = do
+		let minval = head (flatten node)
+		if count <= 0 then
+			node
+		else
+			insLeft (insertKeepBalance node (Node Void Void (val minval - 1))) (count - 1)
+			
+
+	let t0 = insertKeepBalance Void (Node Void Void 20)
+	let t = insLeft t0 20
 	
-	let h = printTree t8 1
+	let h = printTree t 1
 
 	putStrLn h
-	print "?"
+	print (show (flatten t))

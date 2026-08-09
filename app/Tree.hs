@@ -1,3 +1,6 @@
+import qualified Data.Map as Map
+import qualified Data.Set as Set
+
 data Node = Node {left :: Node, right :: Node, val :: Int} | Void
 
 instance Show Node where
@@ -9,6 +12,33 @@ printTree (Node l r v) c = do
 	show v ++ "\n" ++ br ++ "L: " ++ printTree l (c+1) ++ "\n" ++ br ++ "R: " ++ printTree r (c+1)
 printTree Void _ = do
 	"N"
+
+populateMap :: Node -> Int -> Map.Map Int [Node] -> Map.Map Int [Node]
+populateMap Void _ _ = Map.empty
+populateMap (Node l r v) nodeLvl lvlMap = do
+	let node = (Node l r v)
+	let keys = Map.keysSet lvlMap
+	let isKey = Set.member nodeLvl keys
+	if isKey then do
+		let vals = snd (Map.elemAt nodeLvl lvlMap)
+		let nlist = vals ++ [node]
+		-- Map.update (\ l -> Just l) nodeLvl lvlMap
+		let m = (Map.insert nodeLvl nlist lvlMap)
+		let m1 = populateMap l (nodeLvl + 1) m
+		let m2 = populateMap l (nodeLvl + 1) m1
+		m2
+	else do
+		let m = Map.insert nodeLvl [node] lvlMap
+		let m1 = populateMap l (nodeLvl + 1) m
+		let m2 = populateMap l (nodeLvl + 1) m1
+		m2
+
+printTreeH :: Node -> String
+printTreeH Void = "N"
+printTreeH (Node l r v)  = do
+	let node = Node l r v
+	let lmap = populateMap node 1 Map.empty
+	show lmap
 
 flatten :: Node -> [Node]
 flatten Void = []
@@ -99,8 +129,6 @@ insertKeepBalance (Node ll rr vv) node = do
 	let node' = insertNoBalance (Node ll rr vv) node
 	rebalance node'
 
--- TODO função printflat
-
 main :: IO ()
 main = do
 	let insLeft node count = do
@@ -116,5 +144,6 @@ main = do
 	
 	let h = printTree t 1
 
+	putStrLn ("mm:= " ++ printTreeH t)
 	putStrLn h
 	print (show (flatten t))

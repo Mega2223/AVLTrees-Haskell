@@ -37,8 +37,8 @@ printTreeH (Node l r v)  = do
 	let lvlToStr lvl = do
 		let lvLs = Map.lookup lvl lmap
 		case lvLs of
-			Nothing -> ""
-			(Just lllist) -> show lvLs
+			Nothing -> "?"
+			(Just lllist) -> show lllist
 	let lvls = map lvlToStr keys
 	foldl (\a b -> a ++ "\n" ++ b) "" lvls
 

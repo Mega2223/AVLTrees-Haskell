@@ -34,11 +34,12 @@ printTreeH (Node l r v)  = do
 	let node = Node l r v
 	let lmap = populateMap node 1 Map.empty
 	let keys = Set.toAscList (Map.keysSet lmap)
+
 	let lvlToStr lvl = do
 		let lvLs = Map.lookup lvl lmap
 		case lvLs of
 			Nothing -> "?"
-			(Just lllist) -> show lllist
+			(Just somelvl) -> foldl (\a b -> show a ++ " " ++ show b) "" somelvl
 	let lvls = map lvlToStr keys
 	foldl (\a b -> a ++ "\n" ++ b) "" lvls
 

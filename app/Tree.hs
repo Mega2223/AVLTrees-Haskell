@@ -1,5 +1,6 @@
 import qualified Data.Map as Map
 import qualified Data.Set as Set
+import qualified Data.Maybe as Maybe
 
 data Node = Node {left :: Node, right :: Node, val :: Int} | Void
 
@@ -14,31 +15,32 @@ printTree Void _ = do
 	"N"
 
 populateMap :: Node -> Int -> Map.Map Int [Node] -> Map.Map Int [Node]
-populateMap Void _ _ = Map.empty
+populateMap Void _ lvlMap = lvlMap
 populateMap (Node l r v) nodeLvl lvlMap = do
-	let node = (Node l r v)
-	let keys = Map.keysSet lvlMap
-	let isKey = Set.member nodeLvl keys
-	if isKey then do
-		let vals = snd (Map.elemAt nodeLvl lvlMap)
-		let nlist = vals ++ [node]
-		-- Map.update (\ l -> Just l) nodeLvl lvlMap
-		let m = (Map.insert nodeLvl nlist lvlMap)
-		let m1 = populateMap l (nodeLvl + 1) m
-		let m2 = populateMap l (nodeLvl + 1) m1
-		m2
-	else do
-		let m = Map.insert nodeLvl [node] lvlMap
-		let m1 = populateMap l (nodeLvl + 1) m
-		let m2 = populateMap l (nodeLvl + 1) m1
-		m2
+	let node = Node l r v
+	let lvListMaybe = Map.lookup nodeLvl lvlMap
+	let llist = case lvListMaybe of
+		(Just lllist) -> lllist
+		Nothing -> []
+	let nlist = llist ++ [node]
+	let m = Map.insert nodeLvl nlist lvlMap
+	let m1 = populateMap l (nodeLvl + 1) m
+	let m2 = populateMap r (nodeLvl + 1) m1
+	m2
 
 printTreeH :: Node -> String
 printTreeH Void = "N"
 printTreeH (Node l r v)  = do
 	let node = Node l r v
 	let lmap = populateMap node 1 Map.empty
-	show lmap
+	let keys = Set.toAscList (Map.keysSet lmap)
+	let lvlToStr lvl = do
+		let lvLs = Map.lookup lvl lmap
+		case lvLs of
+			Nothing -> ""
+			(Just lllist) -> show lvLs
+	let lvls = map lvlToStr keys
+	foldl (\a b -> a ++ "\n" ++ b) "" lvls
 
 flatten :: Node -> [Node]
 flatten Void = []
